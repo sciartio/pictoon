@@ -155,10 +155,8 @@ SOFTWARE. -->
                     THRES: 0.6, // binarization threshold
                 },
                 LEVEL: {
-                    PVT1_X: 0.01,
-                    PVT1_Y: 0.01,
-                    PVT2_X: 0.99,
-                    PVT2_Y: 0.99,
+                    LOWER: 0.01,
+                    UPPER: 0.99,
                 },
                 BILATERAL: {
                     SPACE: 3.0,
@@ -187,10 +185,8 @@ SOFTWARE. -->
 
                 let level = gui.addFolder('Level');
                 level.open();
-                level.add(config.LEVEL, 'PVT1_X', 0.01, 0.5).name('pivot1.x').onFinishChange(render);
-                level.add(config.LEVEL, 'PVT1_Y', 0.01, 0.5).name('pivot1.y').onFinishChange(render);
-                level.add(config.LEVEL, 'PVT2_X', 0.5, 0.99).name('pivot2.x').onFinishChange(render);
-                level.add(config.LEVEL, 'PVT2_Y', 0.5, 0.99).name('pivot2.y').onFinishChange(render);
+                level.add(config.LEVEL, 'LOWER', 0.01, 0.5).name('lower').onFinishChange(render);
+                level.add(config.LEVEL, 'UPPER', 0.5, 0.99).name('upper').onFinishChange(render);
                 
                 gui.add({ fun: resetParameters }, 'fun').name('Reset Parameters');
 
@@ -370,7 +366,7 @@ SOFTWARE. -->
                 hkFdog(fdog, tangent, fdog, config.FDOG.FLOWDOG);
                 hkBinarize(fdog, fdog, config.FDOG.THRES);
 
-                hkLevelCol(bilat, bilat, config.LEVEL.PVT1_X, config.LEVEL.PVT1_Y, config.LEVEL.PVT2_X, config.LEVEL.PVT2_Y);
+                hkLevelCol(bilat, bilat, config.LEVEL.LOWER, config.LEVEL.UPPER);
                 hkDBL(bilat, tangent, bilat, 3.5, 0.3);
                 hkFBL(bilat, tangent, bilat, 10.0, 0.3);
                 hkSaturate(bilat, bilat, 1.3);
@@ -403,14 +399,10 @@ SOFTWARE. -->
                 gui.__folders.FDoG.__controllers[2].updateDisplay(); // flowdog
                 gui.__folders.FDoG.__controllers[3].updateDisplay(); // thres
 
-                config.LEVEL.PVT1_X = "0.01";
-                config.LEVEL.PVT1_Y = "0.01";
-                config.LEVEL.PVT2_X = "0.99";
-                config.LEVEL.PVT2_Y = "0.99";
-                gui.__folders.Level.__controllers[0].updateDisplay(); // pivot1.x
-                gui.__folders.Level.__controllers[1].updateDisplay(); // pivot1.y
-                gui.__folders.Level.__controllers[2].updateDisplay(); // pivot2.x
-                gui.__folders.Level.__controllers[3].updateDisplay(); // pivot2.y
+                config.LEVEL.LOWER = "0.01";
+                config.LEVEL.UPPER = "0.99";
+                gui.__folders.Level.__controllers[0].updateDisplay(); // lower
+                gui.__folders.Level.__controllers[1].updateDisplay(); // upper
 
                 render();
             }
@@ -472,11 +464,11 @@ SOFTWARE. -->
                 shader.render( renderer, dst );
             }
 
-            function hkLevelCol(src, dst, x1, y1, x2, y2) {
+            function hkLevelCol(src, dst, lower, upper) {
                 let shader = levelcolShader;
                 shader.uniforms[ 'u_image' ].value = src.readBuffer.texture;
-                shader.uniforms[ 'u_pivot1' ].value = new Vector2(x1, y1);
-                shader.uniforms[ 'u_pivot2' ].value = new Vector2(x2, y2);
+                shader.uniforms[ 'u_lower' ].value = lower;
+                shader.uniforms[ 'u_upper' ].value = upper;
                 shader.render( renderer, dst );
             }
 
